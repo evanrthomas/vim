@@ -1,0 +1,42 @@
+n<noremap <silent> <F4> :set opfunc=CountSpaces<CR>g@
+vnoremap <silent> <F4> :<C-U>call CountSpaces(visualmode(), 1)<CR>
+
+function! CountSpaces(type, ...)
+  let sel_save = &selection
+  let &selection = "inclusive"
+  let reg_save = @@
+
+  if a:0  " Invoked from Visual mode, use '< and '> marks.
+    silent exe "normal! `<" . a:type . "`>y"
+  elseif a:type == 'line'
+    silent exe "normal! '[V']y"
+  elseif a:type == 'block'
+    silent exe "normal! `[\<C-V>`]y"
+  else
+    silent exe "normal! `[v`]y"
+  endif
+
+  echomsg strlen(substitute(@@, '[^ ]', '', 'g'))
+
+  let &selection = sel_save
+  let @@ = reg_save
+endfunction
+
+function! Swap(type, ...)
+let still = input("")
+python << EOF
+import vim
+def swap(fulltext, still):
+  s,e = fulltext.find(still), fulltext.find(still) + len(still)
+  return fulltext[e:] + still + fulltext[:s]
+buf = vim.current.buffer
+print vim.eval("a:0")
+sline, scol = buf.mark("[")
+eline, ecol = buf.mark("]")
+sline -=1; eline -=1; ecol += 1
+still =  vim.eval("still")
+buf[sline] = buf[sline][:scol] + swap(buf[sline][scol:ecol], still)  + buf[sline][ecol:]
+EOF
+endfunction
+nnoremap <silent> ss :set opfunc=Swap<CR>g@
+vnoremap <silent> ss :call Swap(visualmode(), 1)<CR>

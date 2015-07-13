@@ -24,23 +24,26 @@ inoremap JK <esc>
 
 
 "delete without putting into buffer
-map s "_
+noremap s "_
 noremap x "_x
 
 
 noremap q %
-noremap % q
 noremap <Leader>q q1
 "replay macro then go to next line, map tilda because you can press tilda
 "multiple times
 noremap <Leader>l ^@1j^
-noremap ` ^@1j^
+noremap ` @1
 noremap <Leader>rp @1
-noremap <Leader>a :normal @1
+noremap <Leader>a @1
 
 
 "ctags stuffs
-map <Leader>j :rightb vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+"map <Leader>j :rightb vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 "nmap <Leader>h :sp <CR>:exec("tag ".expand("<cword>"))<CR>
-nmap <Leader>s :exec("ts ".expand("<cword>"))<CR>
-nmap <Leader>] <C-]>
+"nmap <Leader>s :exec("ts ".expand("<cword>"))<CR>
+"nmap <Leader>] <C-]>
+
+ca path echo expand('%:p')<CR>
+ca genCtags !ctags `find .`<CR>
+ca csh  ConqueTerm bash <CR>

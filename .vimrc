@@ -26,6 +26,11 @@ endif
 Plugin 'ctrlp.vim'
 Plugin 'fatih/vim-go'
 Plugin 'rosenfeld/conque-term'
+Plugin 'bitc/vim-hdevtools'
+Plugin 'tpope/vim-surround'
+Plugin 'amoffat/snake'
+
+
 call vundle#end()
 
 filetype plugin indent on    " required
@@ -40,10 +45,10 @@ let g:go_doc_keywordprg_enabled=0
 
 let mapleader=" "
 
-set backspace=indent,eol,start
-set foldmethod=indent
-set foldlevel=99
-set foldlevelstart=99
+"set backspace=indent,eol,start
+"set foldmethod=indent
+"set foldlevel=99
+"set foldlevelstart=99
 
 
 " Change colorscheme from default to ron
@@ -51,10 +56,10 @@ colorscheme ron
 
 " Turn on line numbering. Turn it on and of with set number and set number!
 set nu
+set rnu
 
 " Set syntax on
 syntax on
-
 
 function! EraseTrailingWhiteSpace()
   if search('\s\+$', 'nw') != 0
@@ -76,7 +81,10 @@ augroup mygroup
         \ endif
 
   "erase whitespace at the end of new lines
-  autocmd BufWritePre * :call EraseTrailingWhiteSpace()
+  autocmd BufWritePre *
+    \ if  argv(0) != ".git/addp-hunk-edit.diff" |
+    \   call EraseTrailingWhiteSpace() |
+    \ endif
 
   "if you change vimrc, resource it
   autocmd BufWritePost  .vimrc  source %
@@ -85,12 +93,10 @@ augroup END
 
 
 " searching
-set ignorecase
 set smartcase
 set incsearch
-set hlsearch
 set ic "ignore case
-set hls "Higlhight search
+"set hls "Higlhight search
 
 " Wrap text instead of being on one line
 "set lbr
@@ -111,55 +117,6 @@ filetype indent on
 
 set laststatus=2
 
-" Rename tabs to show tab number.
-" (Copied from http://stackoverflow.com/questions/5927952/whats-implementation-of-vims-default-tabline-function)
-if exists("+showtabline")
-  function! MyTabLine()
-    let s = ''
-    let wn = ''
-    let t = tabpagenr()
-    let i = 1
-
-    while i <= tabpagenr('$')
-      let buflist = tabpagebuflist(i)
-      let winnr = tabpagewinnr(i)
-      let s .= '%' . i . 'T'
-      let s .= (i == t ? '%1*' : '%2*')
-      let s .= ' '
-      let wn = tabpagewinnr(i,'$')
-
-      let s .= '%#TabNum#'
-      let s .= i
-      " let s .= '%*'
-      let s .= (i == t ? '%#TabLineSel#' : '%#TabLine#')
-      let bufnr = buflist[winnr - 1]
-      let file = bufname(bufnr)
-      let buftype = getbufvar(bufnr, 'buftype')
-        if buftype == 'nofile'
-          if file =~ '\/.'
-            let file = substitute(file, '.*\/\ze.', '', '')
-          endif
-        else
-          let file = fnamemodify(file, ':p:t')
-        endif
-
-      if file == ''
-        let file = '[No Name]'
-      endif
-
-      let s .= ' ' . file . ' '
-      let i = i + 1
-    endwhile
-    let s .= '%T%#TabLineFill#%='
-    let s .= (tabpagenr('$') > 1 ? '%999XX' : 'X')
-    return s
-  endfunction
-
-  set stal=2
-  set tabline=%!MyTabLine()
-  set showtabline=1
-  highlight link TabNum Special
-endif
 
 
 "test functions
@@ -167,10 +124,14 @@ endif
 ca diff :windo diffthis<CR>
 ca diffoff :windo diffoff<CR>
 noremap mm =
-nnoremap <Leader>c :noh<CR>
-nnoremap <Leader>h  *
-:ca fixlog !python logfilter.py
-nnoremap rp ggdG:.!node /home/evan/Desktop/playground/reference/js_ast_try_catch/main.js '%:p'<CR>:set syntax=javascript<CR>G
-ca trca node /home/evan/Desktop/playground/reference/js_ast_try_catch/main.js
-
+nnoremap <silent> <Leader>n  :set rnu!<CR>
+au FileType haskell nnoremap <silent> <buffer> <Leader>ht :HdevtoolsType<CR>
+au FileType haskell nnoremap <silent> <buffer> <Leader>hc :HdevtoolsClear<CR>
+au FileType haskell nnoremap <silent> <buffer> <Leader>hi :HdevtoolsInfo<CR>
+nnoremap <silent> <leader>sr :SyntasticReset<CR>
+set splitright
+nnoremap n /<CR>
+nnoremap N ?<CR>
+xnoremap <leader>a :norm! @1<CR>
+"let g:syntastic_python_python_exec = 'python3'
 
